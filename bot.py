@@ -5,7 +5,7 @@ from binance.enums import *
 
 SOCKET = "wss://stream.binance.us:9443/ws/algousd@kline_1m"
 
-BBPB_PERIOD = 2
+BBPB_PERIOD = 20
 BBPB_OVERBOUGHT = .70
 BBPB_OVERSOLD = .30
 TRADE_SYMBOL = 'ALGOUSD'
@@ -87,11 +87,11 @@ def on_message(ws, message):
             upperband, middleband, lowerband = talib.BBANDS(np_closes, timeperiod=2, nbdevup=2, nbdevdn=2, matype=0)
 
             dfupper = pandas.DataFrame(upperband)
-            dfupper = dfupper.iloc[2:, :]
+            dfupper = dfupper.iloc[20:, :]
             dflower = pandas.DataFrame(lowerband)
-            dflower = dflower.iloc[2:, :]
+            dflower = dflower.iloc[20:, :]
             dfclose = pandas.DataFrame(np_closes)
-            dfclose = dfclose.iloc[2:, :]
+            dfclose = dfclose.iloc[20:, :]
 
 
             BBPB = (dfclose - dflower) / (dfupper - dflower)
