@@ -63,7 +63,8 @@ def on_message(ws, message):
     close = candle['c']
 
     if is_candle_closed:
-        pprint.pprint(json_message)
+        ### Enable these if you want all candle data in console, otherwise they clog up the interface
+        # pprint.pprint(json_message)
         pprint.pprint("candle closed at {}".format(close))
         closes.append(float(close))
         lows.append(float(low))
@@ -71,12 +72,13 @@ def on_message(ws, message):
         np_closes = numpy.array(closes)
         np_lows = numpy.array(lows)
         np_highs = numpy.array(highs)
-        print("Closes")
-        pprint.pprint(np_closes)
-        print("Lows")
-        pprint.pprint(np_lows)
-        print("Highs")
-        pprint.pprint(np_highs)
+        ### Enable these if you want historical data in console, otherwise they clog up the interface
+        # print("Closes")
+        # pprint.pprint(np_closes)
+        # print("Lows")
+        # pprint.pprint(np_lows)
+        # print("Highs")
+        # pprint.pprint(np_highs)
 
 
         if len(closes) > BBPB_PERIOD:
@@ -93,8 +95,9 @@ def on_message(ws, message):
 
 
             BBPB = (dfclose - dflower) / (dfupper - dflower)
-            pprint.pprint("all BBPB calculated so far")
-            pprint.pprint(BBPB)
+            ### Enable this if you want historical data in console, otherwise they clog up the interface
+            # pprint.pprint("all BBPB calculated so far")
+            # pprint.pprint(BBPB)
 
             last_low = np_lows[-1]
             previous_low = np_lows[-2]
