@@ -52,8 +52,6 @@ def on_close(ws):
 
 def on_message(ws, message):
     global closes, in_position, lows, highs
-
-    print('received message')
     json_message = json.loads(message)
     candle = json_message['k']
     is_candle_closed = candle['x']
@@ -97,7 +95,7 @@ def on_message(ws, message):
             BBPB = (dfclose - dflower) / (dfupper - dflower)
             ### Enable this if you want historical data in console, otherwise they clog up the interface
             # pprint.pprint("all BBPB calculated so far")
-            # pprint.pprint(BBPB)
+            print("candle PercentB at {}".format(BBPB))
 
             last_low = np_lows[-1]
             previous_low = np_lows[-2]
@@ -108,35 +106,32 @@ def on_message(ws, message):
 
             if last_high < previous_high and last_low > previous_low:
 
-                pprint.pprint("Inside Candle Detected")
+                print("Inside Candle Detected")
 
                 if last_BBPB < BBPB_OVERSOLD:
                     if in_position:
-                        pprint.pprint("It is oversold, but you already own it, nothing to do.")
+                        print("It is oversold, but you already own it, nothing to do.")
                     else:
-                        pprint.pprint("Oversold! Buy! Buy! Buy!")
+                        print("Oversold! Buy! Buy! Buy!")
                         # put binance buy order logic here
                         order_succeeded = order(SIDE_BUY, TRADE_QUANTITY, TRADE_SYMBOL)
                         if order_succeeded:
                             in_position = True
                 else:
-                    pprint.pprint("It is neither Oversold or Overbought, we do nothing.")
+                    print("It is neither Oversold or Overbought, we do nothing.")
 
             if last_BBPB > BBPB_OVERBOUGHT:
                 if in_position:
-                    pprint.pprint("Overbought! Sell! Sell! Sell!")
+                    print("Overbought! Sell! Sell! Sell!")
                     # put binance sell logic here
                     order_succeeded = order(SIDE_SELL, TRADE_QUANTITY, TRADE_SYMBOL)
                     if order_succeeded:
                         in_position = False
                 else:
-                    pprint.pprint("It is overbought, but we don't own any. Nothing to do.")
+                    print("It is overbought, but we don't own any. Nothing to do.")
 
             else:
-                pprint.pprint("Inside Candle Not-Detected Nor Oversold - Waiting")
-    if is_candle_closed == False:
-        print("Candle Not Closed Yet")
-
+                print("Inside Candle Not-Detected Nor Oversold - Waiting")
 
 
 ws = websocket.WebSocketApp(SOCKET, on_open=on_open, on_close=on_close, on_message=on_message)
