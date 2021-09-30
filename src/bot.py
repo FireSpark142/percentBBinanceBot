@@ -2,6 +2,7 @@ import websocket, json, pprint, talib, numpy
 import pandas
 from binance.client import Client
 from binance.enums import *
+import src.pre_processing as pp
 
 SOCKET = "wss://stream.binance.us:9443/ws/algousd@kline_1m"
 
@@ -17,17 +18,19 @@ highs = []
 in_position = False
 
 
-def apikey():
-    print("Enter your API_KEY from Binance")
-    API_KEY = input()
-    return API_KEY
+# def apikey():
+#     print("Enter your API_KEY from Binance")
+#     API_KEY = input()
+#     return API_KEY
+#
+# def apisecret():
+#     print("Enter your API_SECRET from Binance")
+#     API_SECRET = input()
+#     return API_SECRET
+api_keys = pp.read_api_keys_json()
 
-def apisecret():
-    print("Enter your API_SECRET from Binance")
-    API_SECRET = input()
-    return API_SECRET
 
-client = Client(apikey(), apisecret(), tld='us')
+client = Client(api_keys.public_api_key, api_keys.secret_api_key, tld='us')
 
 
 def order(side, quantity, symbol, order_type=ORDER_TYPE_MARKET):
