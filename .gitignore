@@ -138,7 +138,7 @@ dmypy.json
 cython_debug/
 
 # apikeys gitignore
-/data/APIKeys.json
+data/APIKeys.json
 
 # idea (pycharm specific files)
 .idea
