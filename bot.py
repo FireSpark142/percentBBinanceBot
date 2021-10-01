@@ -1,9 +1,8 @@
 import websocket, json, pprint, talib, numpy
-import pandas
 from binance.client import Client
 from binance.enums import *
 
-SOCKET = "wss://stream.binance.us:9443/ws/algousd@kline_1m"
+SOCKET = "wss://stream.binance.us:9443/ws/algousd@kline_5m"
 
 BBPB_PERIOD = 20
 BBPB_OVERBOUGHT = .70
