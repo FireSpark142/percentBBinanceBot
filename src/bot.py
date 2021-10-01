@@ -1,10 +1,9 @@
 import websocket, json, pprint, talib, numpy
-import pandas
 from binance.client import Client
 from binance.enums import *
 import src.pre_processing as pp
 
-SOCKET = "wss://stream.binance.us:9443/ws/algousd@kline_1m"
+SOCKET = "wss://stream.binance.us:9443/ws/algousd@kline_5m"
 
 BBPB_PERIOD = 20
 BBPB_OVERBOUGHT = .70
@@ -54,7 +53,7 @@ def on_close(ws):
 
 
 def on_message(ws, message):
-    global closes, in_position, lows, highs
+    global closes, in_position, lows, highs, last_high, previous_high, last_low, previous_low
     json_message = json.loads(message)
     candle = json_message['k']
     is_candle_closed = candle['x']
@@ -64,8 +63,6 @@ def on_message(ws, message):
     close = candle['c']
 
     if is_candle_closed:
-        ### Enable these if you want all candle data in console, otherwise they clog up the interface
-        # pprint.pprint(json_message)
         pprint.pprint("candle closed at {}".format(close))
         closes.append(float(close))
         lows.append(float(low))
@@ -73,45 +70,37 @@ def on_message(ws, message):
         np_closes = numpy.array(closes)
         np_lows = numpy.array(lows)
         np_highs = numpy.array(highs)
-        ### Enable these if you want historical data in console, otherwise they clog up the interface
-        # print("Closes")
-        # pprint.pprint(np_closes)
-        # print("Lows")
-        # pprint.pprint(np_lows)
-        # print("Highs")
-        # pprint.pprint(np_highs)
 
 
         if len(closes) > BBPB_PERIOD:
 
 
-            upperband, middleband, lowerband = talib.BBANDS(np_closes, timeperiod=2, nbdevup=2, nbdevdn=2, matype=0)
+            upperband, middleband, lowerband = talib.BBANDS(np_closes, timeperiod=20, nbdevup=2, nbdevdn=2, matype=0)
 
-            dfupper = pandas.DataFrame(upperband)
-            dfupper = dfupper.iloc[20:, :]
-            dflower = pandas.DataFrame(lowerband)
-            dflower = dflower.iloc[20:, :]
-            dfclose = pandas.DataFrame(np_closes)
-            dfclose = dfclose.iloc[20:, :]
+            np_upper = numpy.array(upperband)
+            np_upper = np_upper[19:]
+            dflower = numpy.array(lowerband)
+            dflower = dflower[19:]
+            dfclose = numpy.array(np_closes)
+            dfclose = dfclose[19:]
 
+            if (np_upper[-1] - dflower[-1]) != 0:
+                BBPB = (dfclose[-1] - dflower[-1]) / (np_upper[-1] - dflower[-1])
 
-            BBPB = (dfclose - dflower) / (dfupper - dflower)
-            ### Enable this if you want historical data in console, otherwise they clog up the interface
-            # pprint.pprint("all BBPB calculated so far")
+            else:
+                BBPB = (dfclose[-1] - dflower[-1]) / (np_upper[-1] - (dflower[-1] + 0.0000001))
+
             print("candle PercentB at {}".format(BBPB))
 
             last_low = np_lows[-1]
             previous_low = np_lows[-2]
             last_high = np_highs[-1]
             previous_high = np_highs[-2]
-            last_BBPB_list = BBPB.iloc[-1].tolist()
-            last_BBPB = last_BBPB_list[0]
-
             if last_high < previous_high and last_low > previous_low:
 
                 print("Inside Candle Detected")
 
-                if last_BBPB < BBPB_OVERSOLD:
+                if BBPB < BBPB_OVERSOLD:
                     if in_position:
                         print("It is oversold, but you already own it, nothing to do.")
                     else:
@@ -120,10 +109,10 @@ def on_message(ws, message):
                         order_succeeded = order(SIDE_BUY, TRADE_QUANTITY, TRADE_SYMBOL)
                         if order_succeeded:
                             in_position = True
-                else:
+                if BBPB >= BBPB_OVERSOLD:
                     print("It is neither Oversold or Overbought, we do nothing.")
 
-            if last_BBPB > BBPB_OVERBOUGHT:
+            if BBPB > BBPB_OVERBOUGHT:
                 if in_position:
                     print("Overbought! Sell! Sell! Sell!")
                     # put binance sell logic here
@@ -133,8 +122,8 @@ def on_message(ws, message):
                 else:
                     print("It is overbought, but we don't own any. Nothing to do.")
 
-            else:
-                print("Inside Candle Not-Detected Nor Oversold - Waiting")
+        if (last_high < previous_high and last_low > previous_low) == False:
+            print("Inside Candle Not-Detected Nor Oversold - Waiting")
 
 
 ws = websocket.WebSocketApp(SOCKET, on_open=on_open, on_close=on_close, on_message=on_message)
