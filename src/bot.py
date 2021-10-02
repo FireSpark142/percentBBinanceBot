@@ -3,7 +3,7 @@ from binance.client import Client
 from binance.enums import *
 import src.pre_processing as pp
 
-SOCKET = "wss://stream.binance.us:9443/ws/algousd@kline_5m"
+SOCKET = "wss://stream.binance.us:9443/ws/algousd@kline_1m"
 
 BBPB_PERIOD = 20
 BBPB_OVERBOUGHT = .70
@@ -16,16 +16,6 @@ lows = []
 highs = []
 in_position = False
 
-
-# def apikey():
-#     print("Enter your API_KEY from Binance")
-#     API_KEY = input()
-#     return API_KEY
-#
-# def apisecret():
-#     print("Enter your API_SECRET from Binance")
-#     API_SECRET = input()
-#     return API_SECRET
 api_keys = pp.read_api_keys_json()
 
 
@@ -112,15 +102,15 @@ def on_message(ws, message):
                 if BBPB >= BBPB_OVERSOLD:
                     print("It is neither Oversold or Overbought, we do nothing.")
 
-            if BBPB > BBPB_OVERBOUGHT:
-                if in_position:
-                    print("Overbought! Sell! Sell! Sell!")
-                    # put binance sell logic here
-                    order_succeeded = order(SIDE_SELL, TRADE_QUANTITY, TRADE_SYMBOL)
-                    if order_succeeded:
-                        in_position = False
-                else:
-                    print("It is overbought, but we don't own any. Nothing to do.")
+                if BBPB > BBPB_OVERBOUGHT:
+                    if in_position:
+                        print("Overbought! Sell! Sell! Sell!")
+                        # put binance sell logic here
+                        order_succeeded = order(SIDE_SELL, TRADE_QUANTITY, TRADE_SYMBOL)
+                        if order_succeeded:
+                            in_position = False
+                    else:
+                        print("It is overbought, but we don't own any. Nothing to do.")
 
         if (last_high < previous_high and last_low > previous_low) == False:
             print("Inside Candle Not-Detected Nor Oversold - Waiting")
