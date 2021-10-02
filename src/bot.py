@@ -2,6 +2,7 @@ import websocket, json, pprint, talib, numpy
 from binance.client import Client
 from binance.enums import *
 import src.pre_processing as pp
+from data.config import API_KEY, API_SECRET
 
 SOCKET = "wss://stream.binance.us:9443/ws/algousd@kline_1m"
 
@@ -16,10 +17,7 @@ lows = []
 highs = []
 in_position = False
 
-api_keys = pp.read_api_keys_json()
-
-
-client = Client(api_keys.public_api_key, api_keys.secret_api_key, tld='us')
+client = Client(API_KEY, API_SECRET, tld='us')
 
 
 def order(side, quantity, symbol, order_type=ORDER_TYPE_MARKET):
