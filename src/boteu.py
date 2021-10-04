@@ -3,12 +3,12 @@ from binance.client import Client
 from binance.enums import *
 from data.config import API_KEY, API_SECRET
 
-SOCKET = "wss://stream.binance.com:9443/ws/algousd@kline_1m"
+SOCKET = "wss://stream.binance.com:9443/ws/algousdt@kline_1m"
 
 BBPB_PERIOD = 20
 BBPB_OVERBOUGHT = .70
 BBPB_OVERSOLD = .30
-TRADE_SYMBOL = 'ALGOUSD'
+TRADE_SYMBOL = 'ALGOUSDT'
 TRADE_QUANTITY = 25
 
 closes = []
