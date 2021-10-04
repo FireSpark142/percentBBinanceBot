@@ -8,7 +8,7 @@ SOCKET = "wss://stream.binance.com:9443/ws/algousd@kline_1m"
 BBPB_PERIOD = 20
 BBPB_OVERBOUGHT = .70
 BBPB_OVERSOLD = .30
-TRADE_SYMBOL = 'ALGOUSDt'
+TRADE_SYMBOL = 'ALGOUSDT'
 TRADE_QUANTITY = 25
 
 closes = []
