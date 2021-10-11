@@ -1,0 +1,7 @@
+python-binance
+TA-Lib
+numpy
+backtrader
+flask
+websocket-client
+dask
