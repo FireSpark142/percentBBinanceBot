@@ -34,8 +34,14 @@ def bot():
 
 copy and paste the following commands into your client to get things running:
 
-```pip install -r requirements.txt
+```
+pip install -r requirements.txt
 cd src
-flask run```
-then open your browser and navigate to ```localhost:5000```
+flask run
+```
+then open your browser and navigate to 
+
+```
+localhost:5000
+```
 it can sometimes take a second to propigate.
