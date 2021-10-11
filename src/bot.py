@@ -1,8 +1,8 @@
+import pandas as pd
 import websocket, json, pprint, talib, numpy
 from binance.client import Client
 from binance.enums import *
-import src.pre_processing as pp
-from data.config import API_KEY, API_SECRET
+from src.config import API_KEY, API_SECRET
 
 SOCKET = "wss://stream.binance.us:9443/ws/algousd@kline_1m"
 
@@ -15,6 +15,13 @@ TRADE_QUANTITY = 25
 closes = []
 lows = []
 highs = []
+opens = []
+volumes = []
+trades_qty = []
+l_of_l = []
+symbols = []
+df = pd.DataFrame()
+
 in_position = False
 
 client = Client(API_KEY, API_SECRET, tld='us')
@@ -41,11 +48,14 @@ def on_close(ws):
 
 
 def on_message(ws, message):
-    global closes, in_position, lows, highs, last_high, previous_high, last_low, previous_low
+    global closes, in_position, lows, highs, last_high, previous_high, last_low, previous_low, opens, volumes, trades_qty, l_of_l, symbols, df
     json_message = json.loads(message)
     candle = json_message['k']
+    ticker = candle['s']
     is_candle_closed = candle['x']
-
+    open = candle['o']
+    volume = candle['v']
+    num_of_trades = candle['n']
     low = candle['l']
     high = candle['h']
     close = candle['c']
@@ -55,6 +65,14 @@ def on_message(ws, message):
         closes.append(float(close))
         lows.append(float(low))
         highs.append(float(high))
+        opens.append((float(open)))
+        volumes.append((float(volume)))
+        trades_qty.append((float(num_of_trades)))
+        symbols.append(ticker)
+        l_of_l = [symbols, closes, lows, highs, opens, volumes, trades_qty]
+        df = pd.DataFrame(l_of_l).T
+        df.columns = ['Ticker', 'Close', 'Low', 'High', 'Open', 'Volume', "Qty of Trades"]
+        df.to_csv(index=False)
         np_closes = numpy.array(closes)
         np_lows = numpy.array(lows)
         np_highs = numpy.array(highs)
@@ -67,16 +85,19 @@ def on_message(ws, message):
 
             np_upper = numpy.array(upperband)
             np_upper = np_upper[19:]
-            dflower = numpy.array(lowerband)
-            dflower = dflower[19:]
-            dfclose = numpy.array(np_closes)
-            dfclose = dfclose[19:]
+            np_lower = numpy.array(lowerband)
+            np_lower = np_lower[19:]
+            np_closes = np_closes[19:]
 
-            if (np_upper[-1] - dflower[-1]) != 0:
-                BBPB = (dfclose[-1] - dflower[-1]) / (np_upper[-1] - dflower[-1])
+            if (np_upper[-1] - np_lower[-1]) != 0:
+                BBPB = (np_closes[-1] - np_lower[-1]) / (np_upper[-1] - np_lower[-1])
 
             else:
-                BBPB = (dfclose[-1] - dflower[-1]) / (np_upper[-1] - (dflower[-1] + 0.0000001))
+                BBPB = (np_closes[-1] - np_lower[-1]) / (np_upper[-1] - (np_lower[-1] + 0.0000001))
+
+
+
+
 
             print("candle PercentB at {}".format(BBPB))
 
