@@ -35,6 +35,7 @@ def bot():
 copy and paste the following commands into your client to get things running:
 
 ```
+pip install TA_Lib-0.4.21-cp39-cp39-win_amd64.whl
 pip install -r requirements.txt
 cd src
 flask run
